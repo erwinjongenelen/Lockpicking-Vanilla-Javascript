@@ -1,10 +1,29 @@
 const game = document.getElementById('game');
+const sweetspotRange = 10;
+const hotzone = 30;
 
 // Initialize lockpicks and lockpick health
 let LOCKPICKS = 3;
 let LOCKPICK_HEALTH = 100;
 
 // Generate sweetspot and hotzone in degrees (between -90 and 90, by using floats)
+const generateUnlockZone = () => {
+
+    const sweetspotStart = parseFloat((Math.random() * ((90 - sweetspotRange) - -90) + -90).toFixed(2));
+    const sweetspotEnd = sweetspotStart + sweetspotRange;
+    const hotzoneStart = sweetspotStart - hotzone;
+    const hotzoneEnd = sweetspotEnd + hotzone;
+
+    return {
+        'hotzone_start': hotzoneStart,
+        'hotzone_end': hotzoneEnd,
+        'sweetspot_start': sweetspotStart,
+        'sweetspot_end': sweetspotEnd
+    }
+
+}
+
+console.log( generateUnlockZone() );
 
 // Initialize scene: Background, outer lock, lock, lockpick, kind of lock, amount of lockpicks left
 
