@@ -1,4 +1,8 @@
+const game = document.getElementById('game');
+
 // Initialize lockpicks and lockpick health
+let LOCKPICKS = 3;
+let LOCKPICK_HEALTH = 100;
 
 // Generate sweetspot and hotzone in degrees (between -90 and 90, by using floats)
 
