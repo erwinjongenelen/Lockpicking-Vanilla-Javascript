@@ -1,4 +1,5 @@
 const game = document.getElementById('game');
+const screenHeight = window.innerHeight;
 
 // Settings
 const SWEETSPOT_RANGE = 10;
@@ -54,7 +55,33 @@ const setupInterface = () => {
 
 }
 
-// Setup mouse controls to move lockpick between -90 and 90 degrees
+// Setup controls
+const setupControls = () => {
+
+    // Setup mouse controls to move lockpick between -90 and 90 degrees
+    game.addEventListener('mousemove', mouseControls);
+
+}
+
+
+// Mouse movement controls
+const mouseControls = (e) => {
+    const y = e.clientY;
+    const yPercentageOfScreenHeight = y / screenHeight * 100;
+    const minDegrees = -150;
+    const maxDegrees = 150;
+    let rotation = minDegrees + (yPercentageOfScreenHeight / 100) * (maxDegrees - minDegrees);
+
+    // Rotation cap
+    rotation = rotation < -90 ? -90 : rotation;
+    rotation = rotation > 90 ? 90 : rotation;
+
+    // Set lockpick degrees
+    const lockpick = document.getElementById('lockpick');
+    lockpick.style.transform = `rotate(${rotation}deg)`;
+
+}
+
 
 // Setup mouse click controls to attempt lock rotation
 
@@ -75,6 +102,9 @@ const start = async () => {
 
     // Setup interface
     setupInterface();
+
+    // Setup controls
+    setupControls();
 
 }
 
