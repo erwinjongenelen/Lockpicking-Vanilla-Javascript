@@ -61,6 +61,9 @@ const setupControls = () => {
     // Setup mouse controls to move lockpick between -90 and 90 degrees
     game.addEventListener('mousemove', mouseControls);
 
+    // Setup mouse click controls to attempt lock rotation
+    lockRotationHandling();
+
 }
 
 
@@ -82,8 +85,50 @@ const mouseControls = (e) => {
 
 }
 
+// Lock rotation controls and handling
+const lockRotationHandling = () => {
 
-// Setup mouse click controls to attempt lock rotation
+    // Get lock elements
+    const lock = document.getElementById('lock');
+    const lockImage = document.getElementById('lock-image');
+
+    // Initialize interval
+    let rotateLock = setInterval( () => clearInterval(rotateLock) );
+    let rotateLockCC = setInterval( () => clearInterval(rotateLockCC) );
+
+    let angle = 0;
+
+    // Rotate lock
+    game.addEventListener('mousedown', () => {
+        game.removeEventListener('mousemove', mouseControls);
+        clearInterval(rotateLockCC);
+
+        rotateLock = setInterval( () => {
+            if( angle < 90 ) {
+                angle++;
+                lock.style.transform = `rotate(${angle}deg)`;
+            } else {
+                clearInterval(rotateLock);
+            }
+        }, 15);
+    });
+
+    // Reset lock
+    game.addEventListener('mouseup', () => {
+        game.addEventListener('mousemove', mouseControls);
+        clearInterval(rotateLock);
+
+        rotateLockCC = setInterval( () => {
+            if( angle > 0 ) {
+                angle--;
+                lock.style.transform = `rotate(${angle}deg)`;
+            } else {
+                clearInterval(rotateLockCC);
+            }
+        }, 5);
+    } );
+
+}
 
 // On lock rotation calculate how much the lock can be rotated
 

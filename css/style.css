@@ -17,6 +17,7 @@ body {
 }
 
 #outerlock {
+    pointer-events: none;
     position: relative;
     display: flex;
     justify-content: center;
