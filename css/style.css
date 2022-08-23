@@ -1,0 +1,53 @@
+body {
+    margin: 0;
+    background-image: url('../assets/background.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+#outerlock {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 700px;
+    height: 700px;
+    background-image: url('../assets/outer-lock.png');
+}
+
+#lock {
+    position: relative;
+    width: 700px;
+    height: 700px;
+}
+
+#lockpick-container {
+    position: absolute;
+    height: 800px;
+    bottom: 50%;
+    left: calc(50% - 5px);
+    width: 30px;
+    transform-origin: 15px 100%;
+    transform: rotate(0deg);
+}
+
+#lockpick{
+    position: absolute;
+    height: calc(100% - 75px);
+    width: 100%;
+    bottom: 75px;
+    background: orange;
+    transform-origin: 0 100%;
+    transform: rotate(0deg);
+}
