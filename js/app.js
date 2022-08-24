@@ -4,13 +4,18 @@ const screenHeight = window.innerHeight;
 // Settings
 const SWEETSPOT_RANGE = 10;
 const HOTZONE = 30;
+
+let LOCKPICK_ANGLE = 0;
+let LOCK_ANGLE = 0;
 let UNLOCK_ZONE = {};
 let rotateLock = setInterval( () => clearInterval(rotateLock) );
 let rotateLockCounterClockwise = setInterval( () => clearInterval(rotateLockCounterClockwise) );
+let rotateLockShaker = setInterval( () => clearInterval(rotateLockShaker) );
 
 // Initialize lockpicks and lockpick health
 let LOCKPICKS = 3;
 let LOCKPICK_HEALTH = 100;
+
 
 // Generate sweetspot and hotzone in degrees (between -90 and 90, by using floats)
 const generateUnlockZone = async () => {
@@ -21,10 +26,10 @@ const generateUnlockZone = async () => {
     const hotzoneEnd = sweetspotEnd + HOTZONE;
 
     return {
-        'hotzone_start': hotzoneStart,
-        'hotzone_end': hotzoneEnd,
-        'sweetspot_start': sweetspotStart,
-        'sweetspot_end': sweetspotEnd
+        'hotzoneStart': hotzoneStart,
+        'hotzoneEnd': hotzoneEnd,
+        'sweetspotStart': sweetspotStart,
+        'sweetspotEnd': sweetspotEnd
     }
 
 }
@@ -75,26 +80,31 @@ const mouseControls = (e) => {
     const yPercentageOfScreenHeight = y / screenHeight * 100;
     const minDegrees = -150;
     const maxDegrees = 150;
-    let rotation = minDegrees + (yPercentageOfScreenHeight / 100) * (maxDegrees - minDegrees);
+    LOCKPICK_ANGLE = minDegrees + (yPercentageOfScreenHeight / 100) * (maxDegrees - minDegrees);
 
     // Rotation cap
-    rotation = rotation < -90 ? -90 : rotation;
-    rotation = rotation > 90 ? 90 : rotation;
+    LOCKPICK_ANGLE = LOCKPICK_ANGLE < -90 ? -90 : LOCKPICK_ANGLE;
+    LOCKPICK_ANGLE = LOCKPICK_ANGLE > 90 ? 90 : LOCKPICK_ANGLE;
+
+    console.log(LOCKPICK_ANGLE);
 
     // Set lockpick degrees
     const lockpick = document.getElementById('lockpick');
-    lockpick.style.transform = `rotate(${rotation}deg)`;
+    lockpick.style.transform = `rotate(${LOCKPICK_ANGLE}deg)`;
 
 }
 
 // Lock rotation controls and handling
 const lockRotationHandling = () => {
 
+    // Reset lock angle
+    LOCK_ANGLE = 0;
+
     // Get lock elements
     const lock = document.getElementById('lock');
-    const lockImage = document.getElementById('lock-image');
 
-    let angle = 0;
+    // Get unlockzone as variables
+    const { hotzoneStart, hotzoneEnd, sweetspotStart, sweetspotEnd } = UNLOCK_ZONE;
 
     // Rotate lock
     window.addEventListener('keydown', (e) => {
@@ -109,12 +119,32 @@ const lockRotationHandling = () => {
             clearInterval(rotateLockCounterClockwise);
 
             rotateLock = setInterval( () => {
-                if( angle < 90 ) {
-                    angle++;
-                    lock.style.transform = `rotate(${angle}deg)`;
+                if( LOCKPICK_ANGLE >= sweetspotStart && LOCKPICK_ANGLE <= sweetspotEnd ) {
+
+                    // Rotate further
+                    LOCK_ANGLE++;
+                    lock.style.transform = `rotate(${LOCK_ANGLE}deg)`;
+
+                    // Player wins
+                    if( LOCK_ANGLE >= 90 ) {
+                        clearInterval(rotateLock);
+                        alert('Player wins');
+                    }
+
+                } else if( LOCKPICK_ANGLE >= hotzoneStart && LOCKPICK_ANGLE <= hotzoneEnd ) {
+
+                    // Rotate further
+                    LOCK_ANGLE++;
+                    lock.style.transform = `rotate(${LOCK_ANGLE}deg)`;
+
+                    // TODO: Calculate distance and start shaking
+
                 } else {
-                    clearInterval(rotateLock);
+
+                    // Start shaking
+                    startShaking();
                 }
+  
             }, 15);
         }
     });
@@ -125,16 +155,19 @@ const lockRotationHandling = () => {
 
         if (e.key === ' ') {
 
-            // Enable mouse controls
-            game.addEventListener('mousemove', mouseControls);
+            // Stop shaking
+            stopShaking();
 
             // Clear lock rotation clockwise
             clearInterval(rotateLock);
 
+            // Enable mouse controls
+            game.addEventListener('mousemove', mouseControls);
+
             rotateLockCounterClockwise = setInterval( () => {
-                if( angle > 0 ) {
-                    angle--;
-                    lock.style.transform = `rotate(${angle}deg)`;
+                if( LOCK_ANGLE > 0 ) {
+                    LOCK_ANGLE--;
+                    lock.style.transform = `rotate(${LOCK_ANGLE}deg)`;
                 } else {
                     clearInterval(rotateLockCounterClockwise);
                 }
@@ -147,6 +180,23 @@ const lockRotationHandling = () => {
 // On lock rotation calculate how much the lock can be rotated
 
 // On lock rotation shake lock if not in the sweetspot and reduce lockpick health every x ms
+const startShaking = () => {
+    const lockImage = document.getElementById('lock-image');
+
+    // Add shake animation
+    lockImage.classList.add('shake');
+
+    // Reduce lockpick health
+    LOCKPICK_HEALTH--;
+}
+
+
+const stopShaking = () => {
+    const lockImage = document.getElementById('lock-image');
+
+    // Add shake animation
+    lockImage.classList.remove('shake');
+}
 
 // If lockpick health is reduced to 0, break pick, reduce lockpicks with 1 and restart lock
 
@@ -158,6 +208,7 @@ const start = async () => {
 
     // Set UNLOCK_ZONE global variable
     UNLOCK_ZONE = await generateUnlockZone();
+    console.log(UNLOCK_ZONE);
 
     // Setup interface
     setupInterface();
