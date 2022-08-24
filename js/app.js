@@ -5,6 +5,8 @@ const screenHeight = window.innerHeight;
 const SWEETSPOT_RANGE = 10;
 const HOTZONE = 30;
 let UNLOCK_ZONE = {};
+let rotateLock = setInterval( () => clearInterval(rotateLock) );
+let rotateLockCounterClockwise = setInterval( () => clearInterval(rotateLockCounterClockwise) );
 
 // Initialize lockpicks and lockpick health
 let LOCKPICKS = 3;
@@ -92,40 +94,52 @@ const lockRotationHandling = () => {
     const lock = document.getElementById('lock');
     const lockImage = document.getElementById('lock-image');
 
-    // Initialize interval
-    let rotateLock = setInterval( () => clearInterval(rotateLock) );
-    let rotateLockCC = setInterval( () => clearInterval(rotateLockCC) );
-
     let angle = 0;
 
     // Rotate lock
-    game.addEventListener('mousedown', () => {
-        game.removeEventListener('mousemove', mouseControls);
-        clearInterval(rotateLockCC);
+    window.addEventListener('keydown', (e) => {
+        if (e.repeat) return;
 
-        rotateLock = setInterval( () => {
-            if( angle < 90 ) {
-                angle++;
-                lock.style.transform = `rotate(${angle}deg)`;
-            } else {
-                clearInterval(rotateLock);
-            }
-        }, 15);
+        if (e.key === ' ') {
+
+            // Disable mouse controls
+            game.removeEventListener('mousemove', mouseControls);
+
+            // Clear lock rotation counter clockwise
+            clearInterval(rotateLockCounterClockwise);
+
+            rotateLock = setInterval( () => {
+                if( angle < 90 ) {
+                    angle++;
+                    lock.style.transform = `rotate(${angle}deg)`;
+                } else {
+                    clearInterval(rotateLock);
+                }
+            }, 15);
+        }
     });
 
-    // Reset lock
-    game.addEventListener('mouseup', () => {
-        game.addEventListener('mousemove', mouseControls);
-        clearInterval(rotateLock);
+    // Rotate lock counter clockwise
+    window.addEventListener('keyup', (e) => {
+        if (e.repeat) return;
 
-        rotateLockCC = setInterval( () => {
-            if( angle > 0 ) {
-                angle--;
-                lock.style.transform = `rotate(${angle}deg)`;
-            } else {
-                clearInterval(rotateLockCC);
-            }
-        }, 5);
+        if (e.key === ' ') {
+
+            // Enable mouse controls
+            game.addEventListener('mousemove', mouseControls);
+
+            // Clear lock rotation clockwise
+            clearInterval(rotateLock);
+
+            rotateLockCounterClockwise = setInterval( () => {
+                if( angle > 0 ) {
+                    angle--;
+                    lock.style.transform = `rotate(${angle}deg)`;
+                } else {
+                    clearInterval(rotateLockCounterClockwise);
+                }
+            }, 5);
+        }
     } );
 
 }
